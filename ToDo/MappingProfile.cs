@@ -14,7 +14,9 @@ namespace ToDo
 
 			CreateMap<UserForUpdateDto, User>();
 
-			CreateMap<Todo, TodoDto>();
+            CreateMap<LoginRequestDto, User>();
+
+            CreateMap<Todo, TodoDto>();
 
 			CreateMap<TodoForCreationDto, Todo>();
 

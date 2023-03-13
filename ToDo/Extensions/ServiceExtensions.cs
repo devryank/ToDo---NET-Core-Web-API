@@ -2,12 +2,19 @@
 using Entities;
 using Contracts;
 using Repository;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using AutoMapper;
+using Microsoft.Extensions.Configuration;
+using System.Runtime.CompilerServices;
 
 namespace ToDo.Extensions
 {
 	public static class ServiceExtensions
 	{
-		public static void ConfigureCors(this IServiceCollection services)
+        public static void ConfigureCors(this IServiceCollection services)
 		{
 			services.AddCors(options =>
 			{
@@ -38,5 +45,6 @@ namespace ToDo.Extensions
 		{
 			services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
 		}
-	}
+
+    }
 }

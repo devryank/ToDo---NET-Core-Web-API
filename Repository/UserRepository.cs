@@ -14,10 +14,12 @@ namespace Repository
 	{
 		public UserRepository(RepositoryContext repositoryContext) : base(repositoryContext) { }
 
-		public IEnumerable<User> GetAllUsers()
+		public IEnumerable<User> GetUsers(UserParameters userParameters)
 		{
 			return FindAll()
 			.OrderBy(u => u.Username)
+			.Skip((userParameters.PageNumber - 1) * userParameters.PageSize)
+			.Take(userParameters.PageSize)	
 			.ToList();
 		}
 
@@ -36,5 +38,9 @@ namespace Repository
 		public void CreateUser(User user) => Create(user);
 		public void UpdateUser(User user) => Update(user);
 		public void DeleteUser(User user) => Delete(user);
+		public User GetUserByEmail(string email)
+		{
+			return FindByCondition(user => user.Email == email).FirstOrDefault();
+		}
 	}
 }

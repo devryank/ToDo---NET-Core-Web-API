@@ -1,5 +1,10 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.IdentityModel.Tokens;
 using System.Linq.Expressions;
+using System.Text;
+using ToDo;
 using ToDo.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +15,29 @@ builder.Services.ConfigureIISIntegration();
 builder.Services.ConfigureMySqlContext(builder.Configuration);
 builder.Services.ConfigureRepositoryWrapper();
 builder.Services.AddAutoMapper(typeof(Program));
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(
+                    authenticationScheme: JwtBearerDefaults.AuthenticationScheme,
+                    configureOptions: options =>
+                    {
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = true,
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("secret key jwt ryan kurniawan"))
+                        };
+                    });
+
+// tambahkan konfigurasi Authorization
+//builder.Services.AddAuthorization(options =>
+//{
+//    options.DefaultPolicy = new AuthorizationPolicyBuilder()
+//        .RequireAuthenticatedUser()
+//        .Build();
+//});
 
 builder.Services.AddControllers();
 
@@ -32,8 +60,8 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 
 app.UseCors("CorsPolicy");
 
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
