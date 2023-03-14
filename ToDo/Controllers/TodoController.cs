@@ -2,12 +2,16 @@
 using Contracts;
 using Entities.DataTransferObjects;
 using Entities.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
+using System.Security.Claims;
 
 namespace ToDo.Controllers
 {
+	[Authorize(Roles = "Member")]
 	[Route("api/todo")]
-	[ApiController]
+    [ApiController]
 	public class TodoController : ControllerBase
 	{
 		private IRepositoryWrapper _repository;
@@ -85,13 +89,14 @@ namespace ToDo.Controllers
 				if(!ModelState.IsValid)
 				{
 					return BadRequest("Invalid model object");
-				}
-
+                }
+                var id = Helper.JwtHelper.decodeJwt(Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", ""), "id");
+                todo.UserId = new Guid(id);
 				var todoEntity = _mapper.Map<Todo>(todo);
-				_repository.Todo.CreateTodo(todoEntity);
+                _repository.Todo.CreateTodo(todoEntity);
 				_repository.Save();
 
-				var createdTodo = _mapper.Map<TodoDto>(todoEntity);
+                var createdTodo = _mapper.Map<TodoDto>(todoEntity);
 				return CreatedAtRoute("TodoById", new { id = createdTodo.Id }, createdTodo);
 			} catch(Exception ex)
 			{
@@ -113,16 +118,17 @@ namespace ToDo.Controllers
 				{
 					return BadRequest("Invalid model object");
 				}
-
 				var todoEntity = _repository.Todo.GetTodoById(id);
 				if(todoEntity == null)
-				{
+                {
 					return NotFound();
 				}
 
-				_mapper.Map(todo, todoEntity);
+                var UserId = Helper.JwtHelper.decodeJwt(Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", ""), "id");
+                todo.UserId = new Guid(UserId);
+                _mapper.Map(todo, todoEntity);
 
-				_repository.Todo.UpdateTodo(todoEntity);
+                _repository.Todo.UpdateTodo(todoEntity);
 				_repository.Save();
 
 				return Ok(todoEntity);

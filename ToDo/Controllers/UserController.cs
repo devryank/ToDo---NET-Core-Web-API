@@ -28,6 +28,7 @@ namespace ToDo.Controllers
 			_configuration = configuration;
 		}
 
+		[Authorize(Roles = "Admin")]
 		[HttpGet]
 		public IActionResult GetUsers([FromQuery] UserParameters userParameters)
 		{
@@ -56,12 +57,12 @@ namespace ToDo.Controllers
 			}
 		}
 
+		[Authorize]
 		[HttpGet("{id}/todo")]
 		public IActionResult GetUserWithDetails(Guid id)
 		{
 			try
 			{
-				return Ok(_repository.User.GetUserWithDetails(id));
 				var user = _repository.User.GetUserWithDetails(id);
 
 				if(user == null)
@@ -80,10 +81,11 @@ namespace ToDo.Controllers
 			}
 		}
 
-		[Authorize]
+		[Authorize(Roles = "Admin")]
 		[HttpPost]
 		public IActionResult CreateUser([FromBody]UserForCreationDto user)
 		{
+			return Ok(user);
 			try
 			{
 				if(user is null)
@@ -111,78 +113,8 @@ namespace ToDo.Controllers
 			}
 		}
 
-		[HttpPost("login")]
-		public IActionResult Login([FromBody]LoginRequestDto request)
-		{
-			if(request == null)
-			{
-				return NotFound();
-			}
-			var user = _repository.User.GetUserByEmail(request.Email);
-			if(user is null)
-			{
-				return StatusCode(404, new { status = 404, message = "User tidak ditemukan" });
-			}
-			var checkPassword = BCrypt.Net.BCrypt.EnhancedVerify(request.Password, user.Password);
-            if(checkPassword)
-			{
-				string token = CreateToken(user);
-                var userResult = _mapper.Map<UserDto>(user);
-				var claims = decodeJwt(token);
-				//var name = claims.FirstOrDefault(u => u.Type == "name")?.Value;
-				return Ok(new { user = userResult, token });
-			} else
-			{
-				return StatusCode(401, new { status = 401, message = "Password salah" });
-            }
-		}
-
-        private string CreateToken(User user)
-        {
-			List<Claim> claims = new List<Claim>
-			{
-
-				new Claim("name", user.Username)
-			};
-
-			var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Token").Value));
-
-			var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-
-			var token = new JwtSecurityToken(
-				claims: claims,
-				expires: DateTime.Now.AddDays(1),
-				signingCredentials: cred
-				);
-
-			var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-
-			return jwt;
-        }
-
-		private IEnumerable<Claim> decodeJwt(string token)
-		{
-			var tokenHandler = new JwtSecurityTokenHandler();
-
-			var jwtDecoded = tokenHandler.ReadJwtToken(token);
-			var claims = jwtDecoded.Claims;
-
-			
-			//var claimsPrincipal = tokenHandler.ValidateToken(token, new TokenValidationParameters
-			//{
-			//	ValidateIssuerSigningKey = true,
-			//	ValidateIssuer = true,
-			//	ValidateAudience = true,
-			//	ValidIssuer = "your_issuer_here",
-			//	ValidAudience = "your_audience_here",
-			//	IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value))
-			//}, out var validationToken);
-
-			//var claims = claimsPrincipal.Claims;
-			return claims;
-		}
-
-        [HttpPut("{id}")]
+		[Authorize]
+		[HttpPut("{id}")]
 		public IActionResult UpdateUser(Guid id, [FromBody]UserForUpdateDto user)
 		{
 			try
@@ -216,7 +148,8 @@ namespace ToDo.Controllers
 			}
 		}
 
-		[HttpDelete("{id}")]
+        //[Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
 		public IActionResult DeleteUser(Guid id)
 		{
 			try
