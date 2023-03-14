@@ -33,6 +33,24 @@ namespace ToDo.Controllers
 			}
 		}
 
+		[HttpGet("GetMyTodos")]
+		public IActionResult GetMyTodos()
+		{
+			try
+			{
+                var UserId = Helper.JwtHelper.decodeJwt(Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", ""), "id");
+                var todos = _repository.Todo.GetMyTodos(UserId);
+
+				var todoResult = _mapper.Map<IEnumerable<TodoDto>>(todos);
+
+				return Ok(todoResult);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, ex);
+			}
+		}
+
 		[HttpGet("{id}", Name = "TodoById")]
 		public IActionResult GetTodoById(Guid id)
 		{

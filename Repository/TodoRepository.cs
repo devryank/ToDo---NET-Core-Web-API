@@ -21,6 +21,11 @@ namespace Repository
 			return FindAll().ToList();
 		}
 
+		public IEnumerable<Todo> GetMyTodos(string id)
+		{
+			return FindByCondition(todo => todo.UserId.Equals(new Guid(id))).ToList();
+		}
+
 		public Todo GetTodoById(Guid todoId)
 		{
 			return FindByCondition(todo => todo.Id.Equals(todoId)).FirstOrDefault();

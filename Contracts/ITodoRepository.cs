@@ -10,6 +10,7 @@ namespace Contracts
 	public interface ITodoRepository : IRepositoryBase<Todo>
 	{
 		IEnumerable<Todo> GetAllTodos();
+        IEnumerable<Todo> GetMyTodos(string token);
 		Todo GetTodoById(Guid todoId);
 		void CreateTodo(Todo todo);
 		void UpdateTodo(Todo todo);
