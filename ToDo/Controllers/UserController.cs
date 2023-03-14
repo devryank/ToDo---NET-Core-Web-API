@@ -85,7 +85,6 @@ namespace ToDo.Controllers
 		[HttpPost]
 		public IActionResult CreateUser([FromBody]UserForCreationDto user)
 		{
-			return Ok(user);
 			try
 			{
 				if(user is null)
@@ -148,8 +147,8 @@ namespace ToDo.Controllers
 			}
 		}
 
-        //[Authorize(Roles = "Admin")]
-        [HttpDelete("{id}")]
+		[Authorize(Roles = "Admin")]
+		[HttpDelete("{id}")]
 		public IActionResult DeleteUser(Guid id)
 		{
 			try
@@ -170,25 +169,5 @@ namespace ToDo.Controllers
 				return StatusCode(500, ex);
 			}
 		}
-
-        //const int keySize = 64;
-        //const int iterations = 350000;
-        //HashAlgorithmName hashAlgorithm = HashAlgorithmName.SHA512;
-        //string HashPassword(string password, out byte[] salt)
-        //{
-        //    salt = RandomNumberGenerator.GetBytes(keySize);
-        //    var hash = Rfc2898DeriveBytes.Pbkdf2(
-        //        Encoding.UTF8.GetBytes(password),
-        //        salt,
-        //        iterations,
-        //        hashAlgorithm,
-        //        keySize);
-        //    return Convert.ToHexString(hash);
-        //}
-        //bool VerifyPassword(string password, string hash, byte[] salt)
-        //{
-        //    var hashToCompare = Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, hashAlgorithm, keySize);
-        //    return hashToCompare.SequenceEqual(Convert.FromHexString(hash));
-        //}
     }
 }
